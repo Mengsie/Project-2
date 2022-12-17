@@ -43,6 +43,17 @@ app.get('/', function(req, res){
 
 });
 
+const oneDay = 1000 * 60 * 60 * 24;
+app.use(
+  session({
+      secret: "hemmelig",
+      saveUninitialized: false,
+      cookie: { maxAge: oneDay },
+      resave: false,
+  })
+);
+
+
 
 //------------SOCKET IO --------------------------------
 const io = require("socket.io")(server, {
@@ -147,20 +158,11 @@ app.post("/opret", async (req, res) => {
     res.send({ message: "Bruger lavet" });
   } catch (error) {
     console.log(error);
-    res.status(500).send({ message: "Fejl i bruger" });
+    res.status(500).send({ message: "Fejl i server" });
   }
 });
 
 ///seesssssion----------------
-const oneDay = 1000 * 60 * 60 * 24;
-app.use(
-  session({
-      secret: "hemmelig",
-      saveUninitialized: false,
-      cookie: { maxAge: oneDay },
-      resave: false,
-  })
-);
 
 
 app.post("/login", async (req, res) => {
