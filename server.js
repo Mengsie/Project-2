@@ -44,14 +44,24 @@ app.get('/', function(req, res){
 });
 
 const oneDay = 1000 * 60 * 60 * 24;
+
+async function generateSecret() {
+  // lav random salt
+  const salt = await bcrypt.genSalt();
+  // Hash random string
+  const hash = await bcrypt.hash('random string', salt);
+  return hash;
+}
+
 app.use(
   session({
-      secret: "hemmelig",
+      secret: generateSecret(),
       saveUninitialized: false,
       cookie: { maxAge: oneDay },
       resave: false,
   })
 );
+
 
 
 
