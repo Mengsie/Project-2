@@ -1,28 +1,36 @@
-// get the form from update.html page by id 
+// form fra HTML
 var form = document.getElementById("form")
 
-// Listening on all id in the update.html
-// using preventDefault, so the submit dosen't execute when the HTML page opens 
-form.addEventListener('submit', function(e) {
+
+form.addEventListener('submit', async function(e) {
+
     e.preventDefault()
     
     var name = document.getElementById("name").value
     var password = document.getElementById("password").value
     
-      const user = {
+      const payload = {
         name: name,
         password: password,
       };
 
-      console.log(user)
-    
-      fetch("https://localhost:3000/opret", {
-        method: "POST", 
-        body: JSON.stringify(user),
-        headers: {
+      try {
+        // Post request til server
+        const response = await fetch("https://localhost:3000/opret", {
+          method: "POST",
+          body: JSON.stringify(payload),
+          headers: {
             "Content-Type": "application/json",
-        },
-      });
-      location.href='https://localhost:3000/login.html'
+          },
+        });
     
-  });
+        // response håndtering
+        if (response.status === 200) {
+          location.href = "https://localhost:3000/login.html";
+        } else {
+          throw new Error("Fejl");
+        }
+      } catch (error) {
+        console.error(error);
+      }
+});

@@ -129,23 +129,27 @@ app.use(express.static(__dirname + "/frontend/"));
 
 
 app.post("/opret", async (req, res) => {
-  console.log(req.body);;
-
-  const payload = {
-    password: req.body.password,
-    username: req.body.name,
-  };
-
   try {
-    const salt = await bcrypt.genSalt()
-    const hashedPassword = await bcrypt.hash(payload.password, salt)
-    console.log(salt)
-    console.log(hashedPassword)
-    db.run(`INSERT INTO users (username, password) VALUES ('${payload.username}', '${hashedPassword}'); `)
-    
-    } catch {
-      console.log("fejl")
-    }  
+
+    //Info fra request
+    const payload = {
+      password: req.body.password,
+      username: req.body.name,
+    };
+
+    //hash password
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(payload.password, salt);
+
+    //indsæt i database
+    await db.run(`INSERT INTO users (username, password) VALUES (?, ?)`,
+      [payload.username, hashedPassword]
+    );
+    res.send({ message: "Bruger lavet" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ message: "Fejl i bruger" });
+  }
 });
 
 ///seesssssion----------------
