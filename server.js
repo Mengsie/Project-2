@@ -142,8 +142,7 @@ app.post("/opret", async (req, res) => {
     const hashedPassword = await bcrypt.hash(payload.password, salt);
 
     //indsæt i database
-    await db.run(`INSERT INTO users (username, password) VALUES (?, ?)`,
-      [payload.username, hashedPassword]
+    await db.run(`INSERT INTO users (username, password) VALUES (?, ?)`, [payload.username, hashedPassword]
     );
     res.send({ message: "Bruger lavet" });
   } catch (error) {
@@ -165,7 +164,6 @@ app.use(
 
 
 app.post("/login", async (req, res) => {
-  
   const payload = {
     password: req.body.password,
     username: req.body.name,
@@ -176,22 +174,15 @@ app.post("/login", async (req, res) => {
         if( await bcrypt.compare(payload.password, table[0].password)){
         req.session.loggedIn = true;
         req.session.username = payload.username;
-        res.redirect('/chat.html');
-        console.log("det stemmer")
-             
+        res.redirect('/chat.html');  
         } else (
-          res.status(404).send('Bruger finde ikke')
-          
-        )
-          
+          res.status(401).send('Log ind fejlet')
+        ) 
        } catch {
-         console.log("rip")
-         console.log
-         
-       }
-    
+        console.error(err);
+        res.status(500).send("Server error");
+      }
   })
-
 });
 
 

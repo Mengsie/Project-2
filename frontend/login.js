@@ -1,41 +1,42 @@
 
 // Listening on all id in the update.html
 // using preventDefault, so the submit dosen't execute when the HTML page opens 
-form.addEventListener('submit', function(e) {
+form.addEventListener('submit', async function(e) {
     e.preventDefault()
     
     var name = document.getElementById("name").value
     var password = document.getElementById("password").value
     
-      const user = {
+      const payload = {
         name: name,
         password: password,
       };
-    
-      fetch("https://localhost:3000/login", {
+
+      try {
+      const response = await fetch("https://localhost:3000/login", {
         method: "POST", 
-        body: JSON.stringify(user),
+        body: JSON.stringify(payload),
         headers: {
             "Content-Type": "application/json",
         },
     
       })
       //Håndterer promise fra fetch med then
-      .then((response) => {
-      //Hvis oplsyningerne ikke findes sendes en alert
-      if (response.status === 404) {
-           alert("brugeren findes ikke!");
+      if (response.status === 401) {
+           alert("Log ind fejlet!");
+           throw new Error("Fejl");
       }   
     
       else {
+        //send chat app html
           location.href='https://localhost:3000/chat.html'
-          
-      }})
+        }
+      } catch (error) {
+        console.error(error);
+      }
+});
     
-  });
-
-
-
+          
 
 
 
