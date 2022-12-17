@@ -45,6 +45,7 @@ app.get('/', function(req, res){
 
 const oneDay = 1000 * 60 * 60 * 24;
 
+//key til express-session
 async function generateSecret() {
   // lav random salt
   const salt = await bcrypt.genSalt();
@@ -53,6 +54,7 @@ async function generateSecret() {
   return hash;
 }
 
+//express-session middleware
 app.use(
   session({
       secret: generateSecret(),
@@ -61,6 +63,7 @@ app.use(
       resave: false,
   })
 );
+
 
 
 
