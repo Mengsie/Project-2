@@ -12,13 +12,13 @@ const fs = require('fs');
 const privateKey = fs.readFileSync('private.key');
 const certificate = fs.readFileSync('certificate.crt');
 
-
 const options = {
   key: privateKey,
   cert: certificate
 };
 
 const server = https.createServer(options, app);
+
 
 const httpServer = http.createServer((req, res) => {
   res.writeHead(301, { 'Location': `https://${req.headers.host}:3000${req.url}` });
@@ -31,7 +31,7 @@ httpServer.listen(portHTTP, () => {
   console.log(`HTTP server listening on port ${portHTTP}`);
 });
 
-const portHTTPS = 3000
+const portHTTPS = 443
 
 server.listen(portHTTPS, () => {
   console.log(`HTTPS server listening on port ${portHTTPS}`)
@@ -42,29 +42,6 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/frontend/opret.html');
 
 });
-
-const oneDay = 1000 * 60 * 60 * 24;
-
-//key til express-session
-async function generateSecret() {
-  // lav random salt
-  const salt = await bcrypt.genSalt();
-  // Hash random string
-  const hash = await bcrypt.hash('random string', salt);
-  return hash;
-}
-
-//express-session middleware
-app.use(
-  session({
-      secret: generateSecret(),
-      saveUninitialized: false,
-      cookie: { maxAge: oneDay },
-      resave: false,
-  })
-);
-
-
 
 
 
@@ -77,7 +54,7 @@ const io = require("socket.io")(server, {
 });
 
 const sessionMiddleware = session({
-  secret: "changeit",
+  secret: "hemmelig",
   resave: false,
   saveUninitialized: false
 });
@@ -90,15 +67,27 @@ io.use(wrap(sessionMiddleware));
 
 
 io.use((socket, next) => {
-  
   const session = socket.request.session;
   if (session && session.loggedIn) {
     console.log("logget ind!")
+    const transport = io.engine;
+
+// Check the type of transport being used
+if (transport.websocket) {
+  console.log('WebSockets are being used');
+} else if (transport.polling) {
+  console.log('Polling is being used');
+} else {
+  console.log("hjdsfsf")
+  console.log(transport.name);
+  console.log(transport.remeberUpgrade)
+}
     next()
   } else {
     next(new Error('unauthorized'));
   }
 });
+
 
 
 const users = {}
@@ -151,6 +140,18 @@ db.serialize(function() {
 app.use(express.static(__dirname + "/frontend/"));
 
 
+const oneDay = 1000 * 60 * 60 * 24;
+//express-session middleware
+app.use(
+  session({
+      secret: 'hemmelig',
+      saveUninitialized: false,
+      cookie: { maxAge: oneDay },
+      resave: false,
+  })
+);
+
+
 
 app.post("/opret", async (req, res) => {
   try {
@@ -189,6 +190,7 @@ app.post("/login", async (req, res) => {
         if( await bcrypt.compare(payload.password, table[0].password)){
         req.session.loggedIn = true;
         req.session.username = payload.username;
+        console.log(req.session.username)
         res.redirect('/chat.html');  
         } else (
           res.status(401).send('Log ind fejlet')

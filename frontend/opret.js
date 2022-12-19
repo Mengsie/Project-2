@@ -16,17 +16,16 @@ form.addEventListener('submit', async function(e) {
 
       try {
         // Post request til server
-        const response = await fetch("https://localhost:3000/opret", {
+        const response = await fetch("/opret", {
           method: "POST",
           body: JSON.stringify(payload),
           headers: {
             "Content-Type": "application/json",
           },
         });
-    
         // response håndtering
         if (response.status === 200) {
-          location.href = "https://localhost:3000/login.html";
+          location.href = "/login.html";
         } else {
           throw new Error("Fejl");
         }
