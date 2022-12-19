@@ -21,7 +21,7 @@ const server = https.createServer(options, app);
 
 
 const httpServer = http.createServer((req, res) => {
-  res.writeHead(301, { 'Location': `https://${req.headers.host}:3000${req.url}` });
+  res.writeHead(301, { 'Location': `https://${req.headers.host}:443${req.url}` });
   res.end();
 });
 

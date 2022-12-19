@@ -1,4 +1,4 @@
-const socket = io('https://localhost:3000')
+const socket = io('https://157.245.24.234')
 
 socket.on('hej2', () => {
   // Print message to client-side log
