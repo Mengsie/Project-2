@@ -1,6 +1,4 @@
 
-// Listening on all id in the update.html
-// using preventDefault, so the submit dosen't execute when the HTML page opens 
 form.addEventListener('submit', async function(e) {
     e.preventDefault()
     

@@ -3,12 +3,12 @@ const app = express()
 const sqlite3 = require('sqlite3').verbose();
 app.use(express.json());
 const session = require("express-session");
-
 const bcrypt = require('bcrypt')
 const http = require('http')
 const https = require('https');
 const fs = require('fs');
 
+//----HTTPS-----
 const privateKey = fs.readFileSync('private.key');
 const certificate = fs.readFileSync('certificate.crt');
 
@@ -19,7 +19,7 @@ const options = {
 
 const server = https.createServer(options, app);
 
-
+//dirigere HTTP til HTTPS
 const httpServer = http.createServer((req, res) => {
   res.writeHead(301, { 'Location': `https://${req.headers.host}:443${req.url}` });
   res.end();
@@ -53,6 +53,7 @@ const io = require("socket.io")(server, {
   }
 });
 
+//Sokcet io med express sessions
 const sessionMiddleware = session({
   secret: "hemmelig",
   resave: false,
@@ -70,18 +71,6 @@ io.use((socket, next) => {
   const session = socket.request.session;
   if (session && session.loggedIn) {
     console.log("logget ind!")
-    const transport = io.engine;
-
-// Check the type of transport being used
-if (transport.websocket) {
-  console.log('WebSockets are being used');
-} else if (transport.polling) {
-  console.log('Polling is being used');
-} else {
-  console.log("hjdsfsf")
-  console.log(transport.name);
-  console.log(transport.remeberUpgrade)
-}
     next()
   } else {
     next(new Error('unauthorized'));
@@ -89,17 +78,16 @@ if (transport.websocket) {
 });
 
 
-
+//brugere connected
 const users = {}
 
+//socket io
 io.on('connection', (socket) => {
 
   username = socket.request.session.username
 
   users[socket.id] = socket.request.session.username
 
-
-  
   
   socket.broadcast.emit('user-connected', username)
 
@@ -118,7 +106,7 @@ io.on('connection', (socket) => {
 app.get('/logout', (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      // Handle error
+      console.log(err)
     } else {
       res.redirect('/login.html');
       console.log("logout")
@@ -128,7 +116,7 @@ app.get('/logout', (req, res) => {
 });
 
 
-
+//DATABASE
 const db = new sqlite3.Database('./db.sqlite');
 
 db.serialize(function() {
@@ -176,7 +164,6 @@ app.post("/opret", async (req, res) => {
   }
 });
 
-///seesssssion----------------
 
 
 app.post("/login", async (req, res) => {
@@ -203,26 +190,3 @@ app.post("/login", async (req, res) => {
 });
 
 
-
-/*
-db.all(`SELECT * FROM users WHERE username="Kat"`, async function(err, table) {
-  console.log(table[0].password)
-})
-*/
-
-
-//test
-app.get("/login", (req, res) => {
-  req.session.loggedIn = true;
-  req.session.username = "mikkel"
-  res.sendFile(__dirname + '/frontend/chat.html');
-
-});
-
-//test
-app.get("/login2", (req, res) => {
-  req.session.loggedIn = true;
-  req.session.username = "Katrine"
-  res.sendFile(__dirname + '/frontend/chat.html');
-
-});
